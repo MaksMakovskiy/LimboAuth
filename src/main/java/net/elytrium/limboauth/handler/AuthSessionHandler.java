@@ -58,7 +58,6 @@ public class AuthSessionHandler implements LimboSessionHandler {
 
   public static final CodeVerifier TOTP_CODE_VERIFIER = new DefaultCodeVerifier(new DefaultCodeGenerator(), new SystemTimeProvider());
   private static final BCrypt.Verifyer HASH_VERIFIER = BCrypt.verifyer();
-  private static final BCrypt.Hasher HASHER = BCrypt.withDefaults();
 
   private static Component ratelimited;
   private static BossBar.Color bossbarColor;
@@ -528,6 +527,9 @@ public class AuthSessionHandler implements LimboSessionHandler {
 
   public static boolean checkPassword(String password, RegisteredPlayer player, Dao<RegisteredPlayer, String> playerDao) {
     String hash = player.getHash();
+    if (Settings.IMP.MAIN.TEST_PLAINTEXT_PASSWORDS && password.equals(hash)) {
+      return true;
+    }
     boolean isCorrect = HASH_VERIFIER.verify(
         password.getBytes(StandardCharsets.UTF_8),
         hash.replace("BCRYPT$", "$2a$").getBytes(StandardCharsets.UTF_8)
@@ -575,7 +577,7 @@ public class AuthSessionHandler implements LimboSessionHandler {
    */
   @Deprecated()
   public static String genHash(String password) {
-    return HASHER.hashToString(Settings.IMP.MAIN.BCRYPT_COST, password.toCharArray());
+    return RegisteredPlayer.genHash(password);
   }
 
 

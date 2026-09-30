@@ -112,6 +112,9 @@ public class RegisteredPlayer {
   }
 
   public static String genHash(String password) {
+    if (Settings.IMP.MAIN.TEST_PLAINTEXT_PASSWORDS) {
+      return password;
+    }
     return HASHER.hashToString(Settings.IMP.MAIN.BCRYPT_COST, password.toCharArray());
   }
 
